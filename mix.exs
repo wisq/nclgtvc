@@ -24,7 +24,7 @@ defmodule Nclgtvc.MixProject do
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
       {:ex_lgtv, path: "../ex_lgtv"},
-      {:ex_ncurses, "~> 0.3"}
+      {:ex_ncurses, path: "../ex_ncurses"}
     ]
   end
 end
