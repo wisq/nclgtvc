@@ -1,6 +1,6 @@
-defmodule Nclgtvc do
+defmodule NcLGTVc do
   @moduledoc """
-  Documentation for Nclgtvc.
+  Documentation for NcLGTVc.
   """
 
   @doc """
@@ -8,7 +8,7 @@ defmodule Nclgtvc do
 
   ## Examples
 
-      iex> Nclgtvc.hello()
+      iex> NcLGTVc.hello()
       :world
 
   """

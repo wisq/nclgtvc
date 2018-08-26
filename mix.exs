@@ -1,4 +1,4 @@
-defmodule Nclgtvc.MixProject do
+defmodule NcLGTVc.MixProject do
   use Mix.Project
 
   def project do

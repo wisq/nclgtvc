@@ -1,8 +1,8 @@
-defmodule NclgtvcTest do
+defmodule NcLGTVcTest do
   use ExUnit.Case
-  doctest Nclgtvc
+  doctest NcLGTVc
 
   test "greets the world" do
-    assert Nclgtvc.hello() == :world
+    assert NcLGTVc.hello() == :world
   end
 end
