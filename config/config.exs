@@ -21,6 +21,10 @@ use Mix.Config
 #     config :logger, level: :info
 #
 
+config :logger, backends: [{LoggerFileBackend, :error_log}]
+
+config :logger, :error_log, path: "tmp/output.log"
+
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment
 # by uncommenting the line below and defining dev.exs, test.exs and such.
