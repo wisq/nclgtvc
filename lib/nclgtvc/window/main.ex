@@ -2,10 +2,10 @@ defmodule NcLGTVc.Window.Main do
   use GenServer
 
   defmodule State do
-    @enforce_keys [:windows, :current_window]
+    @enforce_keys [:panes, :current_pane]
     defstruct(
-      windows: %{},
-      current_window: nil
+      panes: %{},
+      current_pane: nil
     )
   end
 
@@ -26,27 +26,27 @@ defmodule NcLGTVc.Window.Main do
 
   @impl true
   def init(nil) do
-    windows =
+    panes =
       %{}
-      |> add_window(:log, NcLGTVc.Window.Main.Log)
+      |> add_pane(:log, NcLGTVc.Pane.Log)
 
     state = %State{
-      windows: windows,
-      current_window: Map.fetch!(windows, :log)
+      panes: panes,
+      current_pane: Map.fetch!(panes, :log)
     }
 
     {:ok, state}
   end
 
-  defp add_window(map, name, module) do
+  defp add_pane(map, name, module) do
     {:ok, pid} = module.start_link()
     Map.put(map, name, {module, pid})
   end
 
   @impl true
   def handle_call({:resize, lines, columns}, _from, state) do
-    Enum.each(state.windows, fn {_name, {module, pid}} ->
-      module.resize_window(pid, lines, columns)
+    Enum.each(state.panes, fn {_name, {module, pid}} ->
+      module.resize(pid, lines, columns)
     end)
 
     {:reply, :ok, state}
@@ -54,8 +54,8 @@ defmodule NcLGTVc.Window.Main do
 
   @impl true
   def handle_call(:refresh, _from, state) do
-    {module, pid} = state.current_window
-    module.refresh_window(pid)
+    {module, pid} = state.current_pane
+    module.refresh(pid)
     {:reply, :ok, state}
   end
 end

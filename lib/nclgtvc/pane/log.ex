@@ -1,4 +1,4 @@
-defmodule NcLGTVc.Window.Main.Log do
+defmodule NcLGTVc.Pane.Log do
   use GenServer
 
   defmodule State do
@@ -17,11 +17,11 @@ defmodule NcLGTVc.Window.Main.Log do
     GenServer.start_link(__MODULE__, nil)
   end
 
-  def resize_window(pid, lines, columns) do
+  def resize(pid, lines, columns) do
     GenServer.call(pid, {:resize, lines, columns})
   end
 
-  def refresh_window(pid) do
+  def refresh(pid) do
     GenServer.call(pid, :refresh)
   end
 
