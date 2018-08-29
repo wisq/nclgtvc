@@ -32,11 +32,11 @@ defmodule NcLGTVc.Console do
   end
 
   def refresh(window_name) do
-    GenServer.call(@name, {:refresh_one, window_name})
+    GenServer.cast(@name, {:refresh_one, window_name})
   end
 
   def refresh_all do
-    GenServer.call(@name, :refresh_all)
+    GenServer.cast(@name, :refresh_all)
   end
 
   @impl true
@@ -51,6 +51,13 @@ defmodule NcLGTVc.Console do
 
     resize_all(windows)
     {:ok, state}
+  end
+
+  @impl true
+  def handle_cast({:refresh_one, name}, state) do
+    refresh_one(state.windows, name)
+    ExNcurses.doupdate()
+    {:noreply, state}
   end
 
   defp add_window(map, module, opts \\ []) do
