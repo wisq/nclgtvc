@@ -21,9 +21,15 @@ use Mix.Config
 #     config :logger, level: :info
 #
 
-config :logger, backends: [{LoggerFileBackend, :error_log}]
+config :logger,
+  backends: [
+    {LoggerFileBackend, :error_log},
+    {NcLGTVc.LoggerBackend, :nclgtvc}
+  ]
 
 config :logger, :error_log, path: "tmp/output.log"
+
+# config :logger, :nclgtvc, ...
 
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment

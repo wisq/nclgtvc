@@ -7,16 +7,14 @@ defmodule NcLGTVc.Pane.Log do
     @enforce_keys [:nc_win]
     defstruct(
       nc_win: nil,
-      messages: [
-        "this is a window",
-        "it contains text",
-        "more text here"
-      ]
+      messages: []
     )
   end
 
+  @server_name :nclgtvc_pane_log
+
   def start_link() do
-    GenServer.start_link(__MODULE__, nil)
+    GenServer.start_link(__MODULE__, nil, name: @server_name)
   end
 
   def resize(pid, lines, columns) do
@@ -27,11 +25,18 @@ defmodule NcLGTVc.Pane.Log do
     GenServer.call(pid, :refresh)
   end
 
+  def add_message(msg) do
+    pid = Process.whereis(@server_name)
+
+    if is_pid(pid) do
+      GenServer.call(pid, {:message, msg})
+    end
+  end
+
   @impl true
   def init(nil) do
     nc_win = ExNcurses.newwin(0, 0, 0, 0)
     state = %State{nc_win: nc_win}
-    Process.send_after(self(), {:message, 1}, 200)
     {:ok, state}
   end
 
@@ -64,15 +69,13 @@ defmodule NcLGTVc.Pane.Log do
   end
 
   @impl true
-  def handle_info({:message, n}, state) do
-    msg = "message #{n}"
+  def handle_call({:message, msg}, _from, state) do
     ExNcurses.waddstr(state.nc_win, " #{msg}\n")
     ExNcurses.wborder(state.nc_win)
     Console.refresh(Main.window_name())
 
     messages = [msg | state.messages]
     state = %State{state | messages: messages}
-    Process.send_after(self(), {:message, n + 1}, 200)
-    {:noreply, state}
+    {:reply, :ok, state}
   end
 end
