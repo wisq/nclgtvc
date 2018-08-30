@@ -26,8 +26,7 @@ defmodule NcLGTVc.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
       {:ex_lgtv, path: "../ex_lgtv"},
       {:ex_ncurses, path: "../ex_ncurses"},
-      {:logger_file_backend, "~> 0.0.10"},
-      {:signal_handler, github: "wisq/signal_handler"}
+      {:logger_file_backend, "~> 0.0.10"}
     ]
   end
 end
