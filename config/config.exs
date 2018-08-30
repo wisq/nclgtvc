@@ -23,6 +23,7 @@ use Mix.Config
 
 config :logger,
   backends: [
+    :console,
     {LoggerFileBackend, :error_log},
     {NcLGTVc.LoggerBackend, :nclgtvc}
   ]

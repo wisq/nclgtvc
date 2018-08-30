@@ -26,10 +26,9 @@ defmodule NcLGTVc.Pane.Log do
   end
 
   def add_message(msg) do
-    pid = Process.whereis(@server_name)
-
-    if is_pid(pid) do
-      GenServer.call(pid, {:message, msg})
+    case Process.whereis(@server_name) do
+      nil -> {:error, :not_running}
+      pid -> GenServer.call(pid, {:message, msg})
     end
   end
 

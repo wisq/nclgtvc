@@ -1,5 +1,8 @@
 defmodule NcLGTVc.Console do
   use GenServer
+  require Logger
+
+  alias NcLGTVc.Input
 
   defmodule State do
     @enforce_keys [:windows]
@@ -31,6 +34,10 @@ defmodule NcLGTVc.Console do
     GenServer.start_link(__MODULE__, nil, name: @name)
   end
 
+  def shutdown do
+    GenServer.cast(@name, :shutdown)
+  end
+
   def refresh(window_name) do
     GenServer.cast(@name, {:refresh_one, window_name})
   end
@@ -41,7 +48,11 @@ defmodule NcLGTVc.Console do
 
   @impl true
   def init(nil) do
+    Process.flag(:trap_exit, true)
+    Logger.remove_backend(:console)
     ExNcurses.initscr()
+    ExNcurses.noecho()
+    ExNcurses.listen()
 
     windows =
       %{}
@@ -58,6 +69,32 @@ defmodule NcLGTVc.Console do
     refresh_one(state.windows, name)
     ExNcurses.doupdate()
     {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast(:shutdown, state) do
+    {:stop, :normal, state}
+  end
+
+  @impl true
+  def handle_info({:ex_ncurses, :key, key}, state) do
+    Input.Global.handle_key(key)
+    {:noreply, state}
+  end
+
+  @impl true
+  def terminate(reason, state) do
+    ExNcurses.endwin()
+    Logger.add_backend(:console)
+
+    if reason == :normal do
+      # Faster shutdown.  For some reason, stop() takes a couple of seconds.
+      Logger.flush()
+      System.halt(0)
+    else
+      Logger.error("Console exiting unexpectedly.")
+      System.stop(0)
+    end
   end
 
   defp add_window(map, module, opts \\ []) do
