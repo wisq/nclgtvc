@@ -14,6 +14,11 @@ defmodule NcLGTVc.Input.Global do
     NcLGTVc.Console.shutdown()
   end
 
+  def handle_key(?c) do
+    Logger.warn("deliberately crashing now")
+    raise "crash!"
+  end
+
   def handle_key(key) do
     Logger.info("key: #{inspect(key)}")
     :ok

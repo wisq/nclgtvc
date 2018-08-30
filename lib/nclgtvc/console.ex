@@ -22,13 +22,6 @@ defmodule NcLGTVc.Console do
 
   @name :nclgtvc_console
 
-  def child_spec do
-    %{
-      id: @name,
-      start: {__MODULE__, :start_link, []},
-      restart: :transient
-    }
-  end
 
   def start_link do
     GenServer.start_link(__MODULE__, nil, name: @name)

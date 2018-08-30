@@ -43,6 +43,11 @@ defmodule NcLGTVc.LoggerBackend do
     {:ok, %State{state | buffer: buffer}}
   end
 
+  @impl true
+  def handle_info(_unknown, state) do
+    {:ok, state}
+  end
+
   defp flush_buffer(buffer) do
     case :queue.out(buffer) do
       {{:value, msg}, new_buffer} -> flush_buffer_message(msg, buffer, new_buffer)
