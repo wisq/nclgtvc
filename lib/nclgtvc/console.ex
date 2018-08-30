@@ -57,6 +57,8 @@ defmodule NcLGTVc.Console do
 
     state = %State{windows: windows}
 
+    System.SignalHandler.install(NcLGTVc.SignalHandler)
+
     resize_all(windows)
     ExNcurses.doupdate()
     {:ok, state}
@@ -92,6 +94,12 @@ defmodule NcLGTVc.Console do
 
   @impl true
   def handle_cast(:resize, state) do
+    ExNcurses.reinitscr()
+    ExNcurses.noecho()
+    # Force a complete redraw.
+    ExNcurses.clear()
+    ExNcurses.refresh()
+    # Resize (and redraw) all windows.
     resize_all(state.windows)
     ExNcurses.doupdate()
     {:noreply, state}
