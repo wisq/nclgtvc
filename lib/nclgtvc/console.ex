@@ -71,9 +71,22 @@ defmodule NcLGTVc.Console do
 
   @impl true
   def handle_cast(:redraw, state) do
+    # In order to do a complete screen refresh,
+    # we need to completely null out all window output
+    # so when we refresh them, it'll redraw them completely.
+    #
+    # I've tried a bunch of approaches, including `touchwin`
+    # which you would think would work, but this seems to
+    # be the only way.
+
+    # Step 1: Draw a completely blank screen.
     ExNcurses.clear()
-    refresh_all(state.windows)
+    ExNcurses.refresh()
+
+    # Step 2: Now redraw the windows -- from scratch, due to step 1.
+    refresh_all(state.windows, :redraw)
     ExNcurses.doupdate()
+
     {:noreply, state}
   end
 
@@ -137,13 +150,16 @@ defmodule NcLGTVc.Console do
     refresh_all(windows)
   end
 
-  defp refresh_all(windows) do
+  defp refresh_all(windows, mode \\ :refresh) do
     windows
     |> Map.values()
     |> Enum.filter(& &1.visible)
     |> Enum.sort(&sort_overlapping/2)
     |> Enum.each(fn w ->
-      w.module.refresh_window(w.pid)
+      case mode do
+        :refresh -> w.module.refresh_window(w.pid)
+        :redraw -> w.module.redraw_window(w.pid)
+      end
     end)
   end
 

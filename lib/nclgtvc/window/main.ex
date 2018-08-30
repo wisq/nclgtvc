@@ -24,6 +24,10 @@ defmodule NcLGTVc.Window.Main do
     GenServer.call(pid, :refresh)
   end
 
+  def redraw_window(pid) do
+    GenServer.call(pid, :redraw)
+  end
+
   @impl true
   def init(nil) do
     panes =
@@ -56,6 +60,13 @@ defmodule NcLGTVc.Window.Main do
   def handle_call(:refresh, _from, state) do
     {module, pid} = state.current_pane
     module.refresh(pid)
+    {:reply, :ok, state}
+  end
+
+  @impl true
+  def handle_call(:redraw, _from, state) do
+    {module, pid} = state.current_pane
+    module.redraw(pid)
     {:reply, :ok, state}
   end
 end
