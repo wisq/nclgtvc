@@ -113,7 +113,7 @@ defmodule NcLGTVc.Console do
   end
 
   @impl true
-  def terminate(reason, state) do
+  def terminate(reason, _state) do
     ExNcurses.endwin()
     Logger.add_backend(:console)
 
