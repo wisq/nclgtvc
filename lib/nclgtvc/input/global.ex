@@ -28,10 +28,9 @@ defmodule NcLGTVc.Input.Global do
     NcLGTVc.Console.redraw()
   end
 
-  # This doesn't seem to be a very prompt way to detect screen resizes,
-  # so I want to handle SIGWINCH later, but it should suffice for now.
   def handle_key(:resize) do
     NcLGTVc.Console.resize()
+    Logger.info("resize to #{ExNcurses.lines()}x#{ExNcurses.cols()}")
   end
 
   def handle_key(key) do

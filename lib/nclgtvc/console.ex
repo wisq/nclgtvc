@@ -92,6 +92,10 @@ defmodule NcLGTVc.Console do
 
   @impl true
   def handle_cast(:resize, state) do
+    # Force a complete redraw.
+    ExNcurses.clear()
+    ExNcurses.refresh()
+    # Resize (and redraw) all windows.
     resize_all(state.windows)
     ExNcurses.doupdate()
     {:noreply, state}
