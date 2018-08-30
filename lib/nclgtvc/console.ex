@@ -71,7 +71,6 @@ defmodule NcLGTVc.Console do
 
   @impl true
   def handle_cast(:redraw, state) do
-    touch_all(state.windows)
     ExNcurses.clear()
     refresh_all(state.windows)
     ExNcurses.doupdate()
@@ -136,15 +135,6 @@ defmodule NcLGTVc.Console do
     end)
 
     refresh_all(windows)
-  end
-
-  defp touch_all(windows) do
-    windows
-    |> Map.values()
-    |> Enum.filter(& &1.visible)
-    |> Enum.each(fn w ->
-      w.module.touch_window(w.pid)
-    end)
   end
 
   defp refresh_all(windows) do

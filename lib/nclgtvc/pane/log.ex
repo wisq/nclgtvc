@@ -26,10 +26,6 @@ defmodule NcLGTVc.Pane.Log do
     GenServer.call(pid, :refresh)
   end
 
-  def touch(pid) do
-    GenServer.call(pid, :touch)
-  end
-
   def add_message(msg) do
     case Process.whereis(@server_name) do
       nil -> {:error, :not_running}
@@ -56,13 +52,6 @@ defmodule NcLGTVc.Pane.Log do
   @impl true
   def handle_call(:refresh, _from, state) do
     ExNcurses.wnoutrefresh(state.nc_win)
-    {:reply, :ok, state}
-  end
-
-  @impl true
-  def handle_call(:touch, _from, state) do
-    Logger.info("touch!")
-    ExNcurses.touchwin(state.nc_win)
     {:reply, :ok, state}
   end
 
