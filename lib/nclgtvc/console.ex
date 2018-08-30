@@ -10,8 +10,9 @@ defmodule NcLGTVc.Console do
   end
 
   defmodule Window do
-    @enforce_keys [:module]
+    @enforce_keys [:name, :module]
     defstruct(
+      name: nil,
       module: nil,
       pid: nil,
       visible: true,
@@ -21,7 +22,6 @@ defmodule NcLGTVc.Console do
   end
 
   @name :nclgtvc_console
-
 
   def start_link do
     GenServer.start_link(__MODULE__, nil, name: @name)
@@ -35,8 +35,12 @@ defmodule NcLGTVc.Console do
     GenServer.cast(@name, {:refresh_one, window_name})
   end
 
-  def refresh_all do
-    GenServer.cast(@name, :refresh_all)
+  def redraw do
+    GenServer.cast(@name, :redraw)
+  end
+
+  def resize do
+    GenServer.cast(@name, :resize)
   end
 
   @impl true
@@ -54,12 +58,29 @@ defmodule NcLGTVc.Console do
     state = %State{windows: windows}
 
     resize_all(windows)
+    ExNcurses.doupdate()
     {:ok, state}
   end
 
   @impl true
   def handle_cast({:refresh_one, name}, state) do
     refresh_one(state.windows, name)
+    ExNcurses.doupdate()
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast(:redraw, state) do
+    touch_all(state.windows)
+    ExNcurses.clear()
+    refresh_all(state.windows)
+    ExNcurses.doupdate()
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast(:resize, state) do
+    resize_all(state.windows)
     ExNcurses.doupdate()
     {:noreply, state}
   end
@@ -91,16 +112,17 @@ defmodule NcLGTVc.Console do
   end
 
   defp add_window(map, module, opts \\ []) do
+    name = module.window_name()
     {:ok, pid} = module.start_link()
 
     keys =
       Map.new(opts)
       |> Map.merge(%{
+        name: name,
         module: module,
         pid: pid
       })
 
-    name = module.window_name()
     window = struct!(Window, keys)
     Map.put(map, name, window)
   end
@@ -114,13 +136,23 @@ defmodule NcLGTVc.Console do
     end)
 
     refresh_all(windows)
-    ExNcurses.doupdate()
+  end
+
+  defp touch_all(windows) do
+    windows
+    |> Map.values()
+    |> Enum.filter(& &1.visible)
+    |> Enum.each(fn w ->
+      w.module.touch_window(w.pid)
+    end)
   end
 
   defp refresh_all(windows) do
     windows
+    |> Map.values()
+    |> Enum.filter(& &1.visible)
     |> Enum.sort(&sort_overlapping/2)
-    |> Enum.each(fn {_, w} ->
+    |> Enum.each(fn w ->
       w.module.refresh_window(w.pid)
     end)
   end
@@ -140,10 +172,10 @@ defmodule NcLGTVc.Console do
 
   # Return true if win1 should be drawn before win2,
   # i.e. if win1 is BELOW win2.
-  defp sort_overlapping({name1, win1}, {name2, win2}) do
+  defp sort_overlapping(win1, win2) do
     cond do
-      Enum.member?(win1.below, name2) -> true
-      Enum.member?(win2.above, name1) -> true
+      Enum.member?(win1.below, win2.name) -> true
+      Enum.member?(win2.above, win1.name) -> true
       true -> false
     end
   end

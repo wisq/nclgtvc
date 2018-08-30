@@ -16,6 +16,10 @@ defmodule NcLGTVc.Window.Main do
     GenServer.start_link(__MODULE__, nil)
   end
 
+  def touch_window(pid) do
+    GenServer.call(pid, :touch)
+  end
+
   def resize_window(pid, lines, columns) do
     GenServer.call(pid, {:resize, lines, columns})
   end
@@ -41,6 +45,15 @@ defmodule NcLGTVc.Window.Main do
   defp add_pane(map, name, module) do
     {:ok, pid} = module.start_link()
     Map.put(map, name, {module, pid})
+  end
+
+  @impl true
+  def handle_call(:touch, _from, state) do
+    Enum.each(state.panes, fn {_name, {module, pid}} ->
+      module.touch(pid)
+    end)
+
+    {:reply, :ok, state}
   end
 
   @impl true

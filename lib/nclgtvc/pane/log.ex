@@ -1,5 +1,6 @@
 defmodule NcLGTVc.Pane.Log do
   use GenServer
+  require Logger
   alias NcLGTVc.Console
   alias NcLGTVc.Window.Main
 
@@ -25,6 +26,10 @@ defmodule NcLGTVc.Pane.Log do
     GenServer.call(pid, :refresh)
   end
 
+  def touch(pid) do
+    GenServer.call(pid, :touch)
+  end
+
   def add_message(msg) do
     case Process.whereis(@server_name) do
       nil -> {:error, :not_running}
@@ -44,7 +49,8 @@ defmodule NcLGTVc.Pane.Log do
     ExNcurses.wresize(state.nc_win, lines - 4, columns)
     ExNcurses.mvwin(state.nc_win, 2, 0)
     ExNcurses.scrollok(state.nc_win, true)
-    {:reply, :ok, state, {:continue, :redraw}}
+    redraw(state)
+    {:reply, :ok, state}
   end
 
   @impl true
@@ -54,17 +60,10 @@ defmodule NcLGTVc.Pane.Log do
   end
 
   @impl true
-  def handle_continue(:redraw, state) do
-    content =
-      state.messages
-      |> Enum.reverse()
-      |> Enum.map(&" #{&1}\n")
-      |> Enum.join()
-
-    ExNcurses.wmove(state.nc_win, 2, 0)
-    ExNcurses.waddstr(state.nc_win, content)
-    ExNcurses.wborder(state.nc_win)
-    {:noreply, state}
+  def handle_call(:touch, _from, state) do
+    Logger.info("touch!")
+    ExNcurses.touchwin(state.nc_win)
+    {:reply, :ok, state}
   end
 
   @impl true
@@ -76,5 +75,17 @@ defmodule NcLGTVc.Pane.Log do
     messages = [msg | state.messages]
     state = %State{state | messages: messages}
     {:reply, :ok, state}
+  end
+
+  defp redraw(state) do
+    content =
+      state.messages
+      |> Enum.reverse()
+      |> Enum.map(&" #{&1}\n")
+      |> Enum.join()
+
+    ExNcurses.wmove(state.nc_win, 2, 0)
+    ExNcurses.waddstr(state.nc_win, content)
+    ExNcurses.wborder(state.nc_win)
   end
 end
