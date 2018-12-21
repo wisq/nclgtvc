@@ -1,5 +1,6 @@
 defmodule NcLGTVc.CLI do
   require Logger
+  alias NcLGTVc.{Console, Options, Connection}
 
   @nif_path Path.join(
               Mix.Project.build_path(),
@@ -9,12 +10,14 @@ defmodule NcLGTVc.CLI do
   def main(args \\ []) do
     Application.put_env(:ex_ncurses, :nif_path, @nif_path)
 
-    NcLGTVc.Options.parse(args)
+    Options.parse(args)
     |> launch()
   end
 
-  defp launch({:ok, _options}) do
-    {:ok, pid} = NcLGTVc.Console.start_link()
+  defp launch({:ok, options}) do
+    {:ok, _pid} = Connection.start_link(options)
+
+    {:ok, pid} = Console.start_link()
     ref = Process.monitor(pid)
 
     receive do
