@@ -23,6 +23,12 @@ defmodule NcLGTVc.Input.Global do
     Connection.command("ssap://audio/volumeUp")
   end
 
+  def handle_key(:up), do: Connection.button("UP")
+  def handle_key(:down), do: Connection.button("DOWN")
+  def handle_key(:left), do: Connection.button("LEFT")
+  def handle_key(:right), do: Connection.button("RIGHT")
+  def handle_key(?\n), do: Connection.click()
+
   # Control-L, redraw screen.
   def handle_key(12) do
     Console.redraw()

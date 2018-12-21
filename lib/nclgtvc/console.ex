@@ -49,6 +49,7 @@ defmodule NcLGTVc.Console do
     Logger.remove_backend(:console)
     ExNcurses.initscr()
     ExNcurses.noecho()
+    ExNcurses.keypad()
     ExNcurses.listen()
 
     windows =

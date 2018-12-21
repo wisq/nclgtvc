@@ -21,6 +21,14 @@ defmodule NcLGTVc.Connection do
     GenServer.call(@name, {:command, uri, payload})
   end
 
+  def button(button) do
+    GenServer.call(@name, {:button, button})
+  end
+
+  def click do
+    GenServer.call(@name, :click)
+  end
+
   @impl true
   def init(options) do
     Process.send_after(self(), :connect, 500)
@@ -33,14 +41,33 @@ defmodule NcLGTVc.Connection do
     {:noreply, %State{state | client: pid}}
   end
 
-  @impl true
-  def handle_call({:command, uri, payload}, _from, state) do
+  defp try_call(state, action, fun) do
     if state.client do
-      rval = Client.call_command(state.client, uri, payload)
-      {:reply, rval, state}
+      {:reply, fun.(), state}
     else
-      Logger.warn("Not connected; can't execute command.")
+      Logger.warn("Not connected; can't #{action}.")
       {:reply, {:error, :not_connected}, state}
     end
+  end
+
+  @impl true
+  def handle_call({:command, uri, payload}, _from, state) do
+    try_call(state, "execute command", fn ->
+      Client.command(state.client, uri, payload)
+    end)
+  end
+
+  @impl true
+  def handle_call({:button, button}, _from, state) do
+    try_call(state, "press #{button}", fn ->
+      Client.button(state.client, button)
+    end)
+  end
+
+  @impl true
+  def handle_call(:click, _from, state) do
+    try_call(state, "click", fn ->
+      Client.click(state.client)
+    end)
   end
 end
