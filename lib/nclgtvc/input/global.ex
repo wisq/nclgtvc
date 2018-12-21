@@ -1,26 +1,35 @@
 defmodule NcLGTVc.Input.Global do
   require Logger
+  alias NcLGTVc.{Console, Connection}
 
   def handle_key(?q) do
-    NcLGTVc.Console.shutdown()
+    Console.shutdown()
   end
 
-  def handle_key(?c) do
-    Logger.warn("deliberately crashing now")
-    raise "crash!"
+  # def handle_key(?c) do
+  #  Logger.warn("deliberately crashing now")
+  #  raise "crash!"
+  # end
+
+  # def handle_key(?p) do
+  #  IO.puts("I'm a bad boy, corrupting the screen")
+  # end
+
+  def handle_key(?[) do
+    Connection.command("ssap://audio/volumeDown")
   end
 
-  def handle_key(?p) do
-    IO.puts("I'm a bad boy, corrupting the screen")
+  def handle_key(?]) do
+    Connection.command("ssap://audio/volumeUp")
   end
 
   # Control-L, redraw screen.
   def handle_key(12) do
-    NcLGTVc.Console.redraw()
+    Console.redraw()
   end
 
   def handle_key(:resize) do
-    NcLGTVc.Console.resize()
+    Console.resize()
     Logger.info("resize to #{ExNcurses.lines()}x#{ExNcurses.cols()}")
   end
 
